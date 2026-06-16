@@ -1,0 +1,1440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bound & Known — A Material Archive</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.42/dist/lenis.min.js"></script>
+  <style>
+    /* ── Reset & base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #090708;
+      --bg-card:   #141012;
+      --bg-hover:  #1b1518;
+      --border:    #2b2227;
+      --border-hi: #44323a;
+      --text:      #eee5e2;
+      --muted:     #958987;
+      --pink:      #c58a97;
+      --pink-dim:  #6f3c49;
+      --blue:      #a994b5;
+      --blue-dim:  #5a4967;
+      --neon-pink: #b96c7e;
+      --neon-blue: #b69a73;
+      --font-sans: 'Space Grotesk', sans-serif;
+      --font-mono: 'Space Mono', monospace;
+      --radius:    12px;
+      --radius-lg: 18px;
+    }
+
+    html { scroll-behavior: auto; }
+
+    body {
+      background:
+        radial-gradient(circle at 12% 8%, rgba(105, 55, 70, 0.18), transparent 34rem),
+        radial-gradient(circle at 86% 18%, rgba(90, 73, 103, 0.13), transparent 30rem),
+        radial-gradient(circle at 50% 100%, rgba(112, 76, 49, 0.1), transparent 34rem),
+        var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    ::selection { background: rgba(185, 108, 126, 0.55); color: var(--text); }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--pink-dim); border-radius: 2px; }
+
+    /* ── Nav ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.65rem 2rem;
+      background: rgba(9,7,8,0.72);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      transition: padding 0.35s cubic-bezier(0.4,0,0.2,1),
+                  background 0.35s ease,
+                  backdrop-filter 0.35s ease,
+                  border-color 0.35s ease;
+    }
+
+    /* collapsed on scroll */
+    nav.collapsed {
+      padding: 0.28rem 2rem;
+      background: rgba(9,7,8,0.48);
+      backdrop-filter: blur(8px);
+      border-bottom-color: transparent;
+    }
+
+    /* expand on hover even when collapsed */
+    nav.collapsed:hover {
+      padding: 0.65rem 2rem;
+      background: rgba(9,7,8,0.78);
+      backdrop-filter: blur(14px);
+      border-bottom-color: var(--border);
+    }
+
+    .nav-logo {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.12em;
+      color: var(--pink);
+      text-decoration: none;
+      transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    nav.collapsed .nav-logo { transform: scale(0.88); }
+    nav.collapsed:hover .nav-logo { transform: scale(1); }
+
+    .nav-links {
+      display: flex;
+      gap: 1.6rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 11px;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: color 0.2s, transform 0.35s cubic-bezier(0.4,0,0.2,1);
+      display: inline-block;
+    }
+
+    .nav-links a:hover { color: var(--blue); }
+
+    nav.collapsed .nav-links a { transform: scale(0.88); }
+    nav.collapsed:hover .nav-links a { transform: scale(1); }
+
+    /* ── Hero ── */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 6rem 2rem 4rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 65% 42% at 18% 62%, rgba(136,68,83,0.18) 0%, transparent 72%),
+        radial-gradient(ellipse 62% 40% at 82% 38%, rgba(120,96,132,0.14) 0%, transparent 72%),
+        radial-gradient(ellipse 46% 30% at 50% 68%, rgba(172,127,84,0.09) 0%, transparent 75%);
+      filter: blur(18px);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title {
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 600;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero-title em {
+      font-style: normal;
+      background: linear-gradient(135deg, #c98f9d 0%, #b69a73 48%, #9f8aad 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-shadow: 0 0 28px rgba(185,108,126,0.18);
+    }
+
+    .hero-sub {
+      max-width: 520px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.8;
+      margin-bottom: 3rem;
+    }
+
+    .hero-rule {
+      width: 60px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(185,108,126,0.75), rgba(182,154,115,0.55), transparent);
+      margin: 0 auto;
+    }
+
+    /* ── Sections ── */
+    .section {
+      padding: 5rem 2.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--pink);
+      padding: 3px 10px;
+      border: 1px solid var(--pink-dim);
+      border-radius: 100px;
+    }
+
+    .section-title {
+      font-size: 1.6rem;
+      font-weight: 500;
+      letter-spacing: -0.01em;
+    }
+
+    .section-count {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--muted);
+      margin-left: auto;
+    }
+
+    /* ── 3D Scan grid ── */
+    .scan-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .scan-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .scan-card:hover {
+      border-color: var(--border-hi);
+      transform: translateY(-3px);
+    }
+
+    .scan-embed {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      background: #100c0e;
+      overflow: hidden;
+    }
+
+    .scan-embed iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      display: block;
+    }
+
+    .scan-placeholder {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .scan-placeholder-icon {
+      width: 48px;
+      height: 48px;
+      border: 1px solid var(--border-hi);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 0.25rem;
+    }
+
+    .scan-placeholder-icon svg {
+      width: 24px;
+      height: 24px;
+      stroke: var(--pink);
+      fill: none;
+      stroke-width: 1.5;
+    }
+
+    .scan-placeholder-url {
+      font-size: 10px;
+      color: var(--pink-dim);
+      word-break: break-all;
+      text-align: center;
+      padding: 0 1rem;
+    }
+
+    .scan-body {
+      padding: 1.25rem 1.5rem 1.5rem;
+    }
+
+    .scan-title {
+      font-size: 15px;
+      font-weight: 500;
+      margin-bottom: 0.4rem;
+    }
+
+    .scan-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.65;
+    }
+
+    /* ── Audio section ── */
+    .audio-list {
+      display: flex;
+      flex-direction: column;
+      gap: 1.75rem;
+    }
+
+    .keyword-nav {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .keyword-link {
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(20,16,18,0.76);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      line-height: 1.35;
+      text-align: center;
+      text-decoration: none;
+      text-transform: uppercase;
+      transition: border-color 0.2s, color 0.2s, background 0.2s;
+    }
+
+    .keyword-link:hover {
+      border-color: var(--pink-dim);
+      background: var(--bg-hover);
+      color: var(--pink);
+    }
+
+    .audio-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      scroll-margin-top: 7rem;
+      transition: border-color 0.3s;
+    }
+
+    .audio-card:hover { border-color: var(--border-hi); }
+
+    .audio-main {
+      display: grid;
+      grid-template-columns: 0.8fr 1.6fr;
+      gap: 0;
+    }
+
+    .audio-info {
+      padding: 1.75rem 2rem;
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .audio-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+
+    .audio-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--blue);
+    }
+
+    .audio-title {
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1.3;
+    }
+
+    .audio-desc {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 0.5rem;
+      line-height: 1.6;
+    }
+
+    .audio-player-wrap {
+      padding: 1.75rem 2rem;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+
+    .recording-item {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(9,7,8,0.28);
+    }
+
+    .recording-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      min-height: 18px;
+    }
+
+    .recording-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--pink);
+    }
+
+    .recording-language {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .audio-context {
+      margin: 0 2rem 1.75rem;
+      padding: 1rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: rgba(27,21,24,0.52);
+    }
+
+    .context-label {
+      display: block;
+      margin-bottom: 0.35rem;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--blue);
+    }
+
+    .audio-context p {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    /* Custom player */
+    .player {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .play-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: transparent;
+      border: 1px solid var(--neon-blue);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+
+    .play-btn:hover { background: rgba(182,154,115,0.1); }
+
+    .play-btn:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+
+    .play-btn:disabled:hover { background: transparent; }
+
+    .play-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--neon-blue);
+      stroke: none;
+    }
+
+    .play-btn.playing svg { display: none; }
+    .play-btn.playing::after {
+      content: '';
+      display: block;
+      width: 12px;
+      height: 12px;
+      background: var(--neon-blue);
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='6' y='4' width='4' height='16'/%3E%3Crect x='14' y='4' width='4' height='16'/%3E%3C/svg%3E");
+      mask-size: contain;
+      mask-repeat: no-repeat;
+      mask-position: center;
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='6' y='4' width='4' height='16'/%3E%3Crect x='14' y='4' width='4' height='16'/%3E%3C/svg%3E");
+      -webkit-mask-size: contain;
+    }
+
+    .progress-wrap {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 3px;
+      background: var(--border-hi);
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--neon-pink), var(--neon-blue));
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.1s linear;
+      pointer-events: none;
+    }
+
+    .progress-times {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    /* Transcript */
+    .transcript-toggle {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      padding: 0;
+      transition: color 0.2s;
+    }
+
+    .transcript-toggle:hover { color: var(--pink); }
+
+    .transcript-toggle svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      transition: transform 0.25s;
+    }
+
+    .transcript-toggle.open svg { transform: rotate(180deg); }
+
+    .transcript-panel {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.4s cubic-bezier(0.4,0,0.2,1);
+      border-top: 1px solid transparent;
+    }
+
+    .transcript-panel.open {
+      max-height: 400px;
+      border-top-color: var(--border);
+    }
+
+    .transcript-inner {
+      padding: 1.5rem 2rem;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.85;
+      font-style: italic;
+      white-space: pre-wrap;
+    }
+
+    .transcript-inner em {
+      font-style: normal;
+      color: var(--text);
+    }
+
+    /* Audio placeholder (no file yet) */
+    .audio-placeholder-note {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--pink-dim);
+      letter-spacing: 0.08em;
+      line-height: 1.45;
+    }
+
+    .transcript-action {
+      padding: 0 2rem 1.75rem;
+    }
+
+    /* ── Divider ── */
+    .section-divider {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 2.5rem;
+    }
+
+    .section-divider hr {
+      border: none;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border-hi), transparent);
+    }
+
+    /* ── Footer ── */
+    footer {
+      text-align: center;
+      padding: 3rem 2rem 4rem;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+      margin-top: 4rem;
+    }
+
+    footer span { color: var(--pink); }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      nav { padding: 0.55rem 1.25rem; }
+      nav.collapsed { padding: 0.22rem 1.25rem; }
+      nav.collapsed:hover { padding: 0.55rem 1.25rem; }
+      .nav-links { gap: 1.2rem; }
+      .section { padding: 4rem 1.25rem; }
+      .keyword-nav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .audio-main { grid-template-columns: 1fr; }
+      .audio-info { border-right: none; border-bottom: 1px solid var(--border); padding: 1.25rem 1.5rem; }
+      .audio-player-wrap { grid-template-columns: 1fr; padding: 1.25rem 1.5rem; }
+      .audio-context { margin: 0 1.5rem 1.25rem; }
+      .transcript-action { padding: 0 1.5rem 1.25rem; }
+      .hero-title { font-size: 2.4rem; }
+    }
+
+    @media (max-width: 480px) {
+      .scan-grid { grid-template-columns: 1fr; }
+      .keyword-nav { grid-template-columns: 1fr; }
+      .nav-links li:last-child { display: none; }
+    }
+
+    /* ── Fade-in on scroll ── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.6s ease, transform 0.6s ease;
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .reveal:nth-child(2) { transition-delay: 0.1s; }
+    .reveal:nth-child(3) { transition-delay: 0.2s; }
+    .reveal:nth-child(4) { transition-delay: 0.3s; }
+  </style>
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav>
+    <a class="nav-logo" href="#top">BOUND & KNOWN</a>
+    <ul class="nav-links">
+      <li><a href="#models">Models</a></li>
+      <li><a href="#tools">Tools</a></li>
+      <li><a href="#audio">Audio</a></li>
+    </ul>
+  </nav>
+
+  <!-- Hero -->
+  <section class="hero" id="top">
+    <p class="hero-eyebrow">A Material Archive — Kink Culture Studies</p>
+    <h1 class="hero-title">Objects of <em>Power</em><br>& Pleasure</h1>
+    <p class="hero-sub">
+      A curated archive of 3D-scanned objects and recorded voices that map the material and sonic landscape of kink culture — its tools, its traditions, its intimacies.
+    </p>
+    <div class="hero-rule"></div>
+  </section>
+
+  <!-- ═══════════════ MODELS ═══════════════ -->
+  <section class="section" id="models">
+    <div class="section-header">
+      <span class="section-tag">Category 01</span>
+      <h2 class="section-title">Models</h2>
+      <span class="section-count">2 objects</span>
+    </div>
+
+    <div class="scan-grid">
+
+      <!-- Card 1 -->
+      <article class="scan-card reveal">
+        <div class="scan-embed">
+          <div class="scan-placeholder">
+            <div class="scan-placeholder-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </div>
+            <span>Shibari model 1</span>
+            <span class="scan-placeholder-url"><iframe id="viewer" width="900" height="600" allow="fullscreen; xr-spatial-tracking" src="https://superspl.at/s?id=2557b446"></iframe></span>
+          </div>
+        </div>
+        <div class="scan-body">
+          <h3 class="scan-title">Object Title — Model 01</h3>
+          <p class="scan-desc">
+            Replace this with a description of the object: its material, origin, cultural context, and significance within kink practice. Approx. 2–3 sentences.
+          </p>
+        </div>
+      </article>
+
+      <!-- Card 2 -->
+      <article class="scan-card reveal">
+        <div class="scan-embed">
+          <div class="scan-placeholder">
+            <div class="scan-placeholder-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </div>
+            <span>Shibari model 2</span>
+            <span class="scan-placeholder-url"><iframe id="viewer" width="900" height="600" allow="fullscreen; xr-spatial-tracking" src="https://superspl.at/s?id=0d9bb111"></iframe></iframe></span>
+          </div>
+        </div>
+        <div class="scan-body">
+          <h3 class="scan-title">Object Title — Model 02</h3>
+          <p class="scan-desc">
+            Replace this with a description of the object: its material, origin, cultural context, and significance within kink practice. Approx. 2–3 sentences.
+          </p>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <div class="section-divider"><hr /></div>
+
+  <!-- ═══════════════ TOOLS ═══════════════ -->
+  <section class="section" id="tools">
+    <div class="section-header">
+      <span class="section-tag">Category 02</span>
+      <h2 class="section-title">Tools</h2>
+      <span class="section-count">3 objects</span>
+    </div>
+
+    <div class="scan-grid">
+
+      <article class="scan-card reveal">
+        <div class="scan-embed">
+          <div class="scan-placeholder">
+            <div class="scan-placeholder-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </div>
+            <span>Vibrator</span>
+            <span class="scan-placeholder-url"><iframe id="viewer" width="900" height="600" allow="fullscreen; xr-spatial-tracking" src="https://superspl.at/s?id=7a315ef4"></iframe></span>
+          </div>
+        </div>
+        <div class="scan-body">
+          <h3 class="scan-title">Object Title — Tool 01</h3>
+          <p class="scan-desc">
+            Replace this with a description of the object: its material, origin, cultural context, and significance within kink practice. Approx. 2–3 sentences.
+          </p>
+        </div>
+      </article>
+
+      <article class="scan-card reveal">
+        <div class="scan-embed">
+          <div class="scan-placeholder">
+            <div class="scan-placeholder-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </div>
+            <span>Spanking tool</span>
+            <span class="scan-placeholder-url"><iframe id="viewer" width="900" height="600" allow="fullscreen; xr-spatial-tracking" src="https://superspl.at/s?id=37beb27f"></iframe></span>
+          </div>
+        </div>
+        <div class="scan-body">
+          <h3 class="scan-title">Object Title — Tool 02</h3>
+          <p class="scan-desc">
+            Replace this with a description of the object: its material, origin, cultural context, and significance within kink practice. Approx. 2–3 sentences.
+          </p>
+        </div>
+      </article>
+
+      <article class="scan-card reveal">
+        <div class="scan-embed">
+          <div class="scan-placeholder">
+            <div class="scan-placeholder-icon">
+              <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+            </div>
+            <span>Handcuffs</span>
+            <span class="scan-placeholder-url"><iframe id="viewer" width="900" height="600" allow="fullscreen; xr-spatial-tracking" src="https://superspl.at/s?id=0228225c"></iframe></span>
+          </div>
+        </div>
+        <div class="scan-body">
+          <h3 class="scan-title">Object Title — Tool 03</h3>
+          <p class="scan-desc">
+            Replace this with a description of the object: its material, origin, cultural context, and significance within kink practice. Approx. 2–3 sentences.
+          </p>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <div class="section-divider"><hr /></div>
+
+  <!-- ═══════════════ AUDIO INTERVIEWS ═══════════════ -->
+  <section class="section" id="audio">
+    <div class="section-header">
+      <span class="section-tag">Category 03</span>
+      <h2 class="section-title">Audio Interviews</h2>
+      <span class="section-count">8 keywords / 30 recordings</span>
+    </div>
+
+    <nav class="keyword-nav" aria-label="Audio interview keywords">
+      <a class="keyword-link" href="#audio-principles">Safety &amp; Principles</a>
+      <a class="keyword-link" href="#audio-safeword">Safeword</a>
+      <a class="keyword-link" href="#audio-finding-partner">Finding Partner</a>
+      <a class="keyword-link" href="#audio-trust">Blood Ritual</a>
+      <a class="keyword-link" href="#audio-consent">Friend's Story</a>
+      <a class="keyword-link" href="#audio-boundaries">Personal Story</a>
+      <a class="keyword-link" href="#audio-aftercare">Aftercare</a>
+      <a class="keyword-link" href="#audio-communication">Reward & Punishment</a>
+    </nav>
+
+    <div class="audio-list">
+
+      <!-- Audio 1 -->
+      <article class="audio-card reveal">
+        <div class="audio-main">
+          <div class="audio-info">
+            <div class="audio-meta">
+              <span class="audio-label">Recording 01</span>
+              <h3 class="audio-title">Interview Title — Subject 01</h3>
+              <p class="audio-desc">
+                Replace with a short description of this interview: who was recorded, what themes emerge, and why this voice matters within the archive. 2–3 sentences.
+              </p>
+            </div>
+          </div>
+          <div class="audio-player-wrap">
+            <div class="player" data-src="audio/interview-01.mp3">
+              <audio preload="none"></audio>
+              <div class="player-controls">
+                <button class="play-btn" aria-label="Play">
+                  <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+                </button>
+                <div class="progress-wrap">
+                  <div class="progress-bar" role="slider" aria-label="Playback position" tabindex="0">
+                    <div class="progress-fill"></div>
+                  </div>
+                  <div class="progress-times">
+                    <span class="time-current">0:00</span>
+                    <span class="time-total">—:——</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="audio-placeholder-note">← Replace src with your audio file path</p>
+            <button class="transcript-toggle" aria-expanded="false">
+              <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+              Transcript
+            </button>
+          </div>
+        </div>
+        <div class="transcript-panel" aria-hidden="true">
+          <div class="transcript-inner">
+<em>[0:00]</em> Replace this text with the full transcript of the interview.
+
+<em>[0:30]</em> You can use timestamps like these to mark sections of the conversation.
+
+<em>[1:00]</em> Continue the transcript here. Italicised timestamps help viewers follow along with the audio as it plays.
+
+<em>[Speaker note]</em> Add speaker identifications, pauses, or context notes in brackets as needed.
+          </div>
+        </div>
+      </article>
+
+      <!-- Audio 2 -->
+      <article class="audio-card reveal">
+        <div class="audio-main">
+          <div class="audio-info">
+            <div class="audio-meta">
+              <span class="audio-label">Recording 02</span>
+              <h3 class="audio-title">Interview Title — Subject 02</h3>
+              <p class="audio-desc">
+                Replace with a short description of this interview: who was recorded, what themes emerge, and why this voice matters within the archive. 2–3 sentences.
+              </p>
+            </div>
+          </div>
+          <div class="audio-player-wrap">
+            <div class="player" data-src="audio/interview-02.mp3">
+              <audio preload="none"></audio>
+              <div class="player-controls">
+                <button class="play-btn" aria-label="Play">
+                  <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+                </button>
+                <div class="progress-wrap">
+                  <div class="progress-bar" role="slider" aria-label="Playback position" tabindex="0">
+                    <div class="progress-fill"></div>
+                  </div>
+                  <div class="progress-times">
+                    <span class="time-current">0:00</span>
+                    <span class="time-total">—:——</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="audio-placeholder-note">← Replace src with your audio file path</p>
+            <button class="transcript-toggle" aria-expanded="false">
+              <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+              Transcript
+            </button>
+          </div>
+        </div>
+        <div class="transcript-panel" aria-hidden="true">
+          <div class="transcript-inner">
+<em>[0:00]</em> Replace this text with the full transcript of the interview.
+
+<em>[0:30]</em> You can use timestamps like these to mark sections of the conversation.
+
+<em>[1:00]</em> Continue the transcript here. Italicised timestamps help viewers follow along with the audio as it plays.
+          </div>
+        </div>
+      </article>
+
+      <!-- Audio 3 -->
+      <article class="audio-card reveal">
+        <div class="audio-main">
+          <div class="audio-info">
+            <div class="audio-meta">
+              <span class="audio-label">Recording 03</span>
+              <h3 class="audio-title">Interview Title — Subject 03</h3>
+              <p class="audio-desc">
+                Replace with a short description of this interview: who was recorded, what themes emerge, and why this voice matters within the archive. 2–3 sentences.
+              </p>
+            </div>
+          </div>
+          <div class="audio-player-wrap">
+            <div class="player" data-src="audio/interview-03.mp3">
+              <audio preload="none"></audio>
+              <div class="player-controls">
+                <button class="play-btn" aria-label="Play">
+                  <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+                </button>
+                <div class="progress-wrap">
+                  <div class="progress-bar" role="slider" aria-label="Playback position" tabindex="0">
+                    <div class="progress-fill"></div>
+                  </div>
+                  <div class="progress-times">
+                    <span class="time-current">0:00</span>
+                    <span class="time-total">—:——</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="audio-placeholder-note">← Replace src with your audio file path</p>
+            <button class="transcript-toggle" aria-expanded="false">
+              <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+              Transcript
+            </button>
+          </div>
+        </div>
+        <div class="transcript-panel" aria-hidden="true">
+          <div class="transcript-inner">
+<em>[0:00]</em> Replace this text with the full transcript of the interview.
+
+<em>[0:30]</em> You can use timestamps like these to mark sections of the conversation.
+
+<em>[1:00]</em> Continue the transcript here. Italicised timestamps help viewers follow along with the audio as it plays.
+          </div>
+        </div>
+      </article>
+
+      <!-- Audio 4 -->
+      <article class="audio-card reveal">
+        <div class="audio-main">
+          <div class="audio-info">
+            <div class="audio-meta">
+              <span class="audio-label">Recording 04</span>
+              <h3 class="audio-title">Interview Title — Subject 04</h3>
+              <p class="audio-desc">
+                Replace with a short description of this interview: who was recorded, what themes emerge, and why this voice matters within the archive. 2–3 sentences.
+              </p>
+            </div>
+          </div>
+          <div class="audio-player-wrap">
+            <div class="player" data-src="audio/interview-04.mp3">
+              <audio preload="none"></audio>
+              <div class="player-controls">
+                <button class="play-btn" aria-label="Play">
+                  <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+                </button>
+                <div class="progress-wrap">
+                  <div class="progress-bar" role="slider" aria-label="Playback position" tabindex="0">
+                    <div class="progress-fill"></div>
+                  </div>
+                  <div class="progress-times">
+                    <span class="time-current">0:00</span>
+                    <span class="time-total">—:——</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="audio-placeholder-note">← Replace src with your audio file path</p>
+            <button class="transcript-toggle" aria-expanded="false">
+              <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+              Transcript
+            </button>
+          </div>
+        </div>
+        <div class="transcript-panel" aria-hidden="true">
+          <div class="transcript-inner">
+<em>[0:00]</em> Replace this text with the full transcript of the interview.
+
+<em>[0:30]</em> You can use timestamps like these to mark sections of the conversation.
+
+<em>[1:00]</em> Continue the transcript here. Italicised timestamps help viewers follow along with the audio as it plays.
+          </div>
+        </div>
+      </article>
+
+      <!-- Audio 5 -->
+      <article class="audio-card reveal">
+        <div class="audio-main">
+          <div class="audio-info">
+            <div class="audio-meta">
+              <span class="audio-label">Recording 05</span>
+              <h3 class="audio-title">Interview Title — Subject 05</h3>
+              <p class="audio-desc">
+                Replace with a short description of this interview: who was recorded, what themes emerge, and why this voice matters within the archive. 2–3 sentences.
+              </p>
+            </div>
+          </div>
+          <div class="audio-player-wrap">
+            <div class="player" data-src="audio/interview-05.mp3">
+              <audio preload="none"></audio>
+              <div class="player-controls">
+                <button class="play-btn" aria-label="Play">
+                  <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+                </button>
+                <div class="progress-wrap">
+                  <div class="progress-bar" role="slider" aria-label="Playback position" tabindex="0">
+                    <div class="progress-fill"></div>
+                  </div>
+                  <div class="progress-times">
+                    <span class="time-current">0:00</span>
+                    <span class="time-total">—:——</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <p class="audio-placeholder-note">← Replace src with your audio file path</p>
+            <button class="transcript-toggle" aria-expanded="false">
+              <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+              Transcript
+            </button>
+          </div>
+        </div>
+        <div class="transcript-panel" aria-hidden="true">
+          <div class="transcript-inner">
+<em>[0:00]</em> Replace this text with the full transcript of the interview.
+
+<em>[0:30]</em> You can use timestamps like these to mark sections of the conversation.
+
+<em>[1:00]</em> Continue the transcript here. Italicised timestamps help viewers follow along with the audio as it plays.
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>Bound & Known — A Material Archive &nbsp;/&nbsp; <span>Kink Culture Studies</span></p>
+  </footer>
+
+  <script>
+    /* ── Lenis smooth scroll ── */
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smooth: true,
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    /* nav anchor clicks → lenis scroll */
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        e.preventDefault();
+        const target = document.querySelector(a.getAttribute('href'));
+        if (target) lenis.scrollTo(target, { offset: -80 });
+      });
+    });
+
+    /* ── Nav collapse on scroll ── */
+    const nav = document.querySelector('nav');
+    const COLLAPSE_THRESHOLD = 120; // px from top before collapsing
+
+    function updateNavState() {
+      const y = window.scrollY || window.pageYOffset;
+      nav.classList.toggle('collapsed', y > COLLAPSE_THRESHOLD);
+    }
+
+    window.addEventListener('scroll', updateNavState, { passive: true });
+    updateNavState(); // initial state
+
+    /* ── Scroll reveal ── */
+    const audioInterviews = [
+      {
+        id: 'audio-principles',
+        label: 'Keyword 01',
+        title: 'Safety & Principles',
+        desc: 'Four recordings connected to safety, negotiation, personal rules, and the principles that shape responsible kink practice.',
+        context: 'Use this space to frame the interview: when the conversation happened, what kind of practice or experience it references, and which parts of safety or principle-setting the listener should notice.',
+        transcript: `<em>[0:00]</em> Replace this text with the full transcript of the interview.
+
+<em>[0:30]</em> You can use timestamps like these to mark sections of the conversation.
+
+<em>[1:00]</em> Continue the transcript here. Italicised timestamps help viewers follow along with the audio as it plays.
+
+<em>[Speaker note]</em> Add speaker identifications, pauses, or context notes in brackets as needed.`,
+        recordings: [
+          { label: 'Snippet', language: 'EN', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781436031/Snippet_-_Retell_Eng_-_Safety_Principles_ia5jnj.mp3' },
+          { label: 'Full', language: 'EN', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781436026/Full_-_Retell_Eng_-_Safety_Principles_lbrugv.mp3' },
+          { label: 'Snippet', language: 'VI', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781436028/Snippet_-_Original_Vie_-_Safety_Principles_uoadxb.mp3' },
+          { label: 'Full', language: 'VI', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781436036/Full_-_Original_Vie_-_Safety_Principles_yd3e6g.mp3' }
+        ]
+      },
+      {
+        id: 'audio-safeword',
+        label: 'Keyword 02',
+        title: 'Safeword',
+        desc: 'Four recordings about pause signals, shared language, and how participants build confidence before, during, and after a scene.',
+        context: 'Use this box to explain how the speakers define safewords, what alternatives they mention, and how this term moves between private agreement and community practice.',
+        transcript: `<em>[0:00]</em> Replace this text with the full transcript of the interview.
+
+<em>[0:30]</em> You can use timestamps like these to mark sections of the conversation.
+
+<em>[1:00]</em> Continue the transcript here. Italicised timestamps help viewers follow along with the audio as it plays.`,
+        recordings: [
+          { label: 'Snippet', language: 'EN', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781436287/Snippet_-_Retell_Eng_-_Safeword_giamms.mp3' },
+          { label: 'Full', language: 'EN', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781436279/Full_-_Retell_Eng_-_Safeword_qog7zd.mp3' },
+          { label: 'Snippet', language: 'VI', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781436283/Snippet_-_Original_Vie_-_Safe_Word_i0jgx8.mp3' },
+          { label: 'Full', language: 'VI', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781436280/Full_-_Original_Vie_-_Safe_Word_jxyhrn.mp3' }
+        ]
+      },
+      {
+        id: 'audio-finding-partner',
+        label: 'Keyword 03',
+        title: 'Finding Partner',
+        desc: 'This keyword currently has two recordings only, focused on how people find compatible partners and begin conversations around trust.',
+        context: 'Use this box to describe the social setting behind the recordings, including where partners are found, what expectations are negotiated early, and what makes a match feel safe enough to continue.',
+        recordings: [
+          { label: 'Snippet', language: 'VI', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781435820/Snippet_-_Original_Vie_-_Finding_Partners_ghwbja.mp3' },
+          { label: 'Full', language: 'VI', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781435829/Full_-_Original_Vie_-_Finding_Partners_hrwcds.mp3' }
+        ]
+      },
+      {
+        id: 'audio-trust',
+        label: 'Keyword 04',
+        title: 'Blood Ritual',
+        desc: 'Four recordings on trust as a practiced relationship: built gradually, tested through communication, and repaired through care.',
+        context: 'Use this box to situate the speakers reflections on trust: what histories they bring, what rituals or check-ins they rely on, and how trust changes over time.',
+        recordings: [
+          { label: 'Snippet', language: 'EN', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781435664/Snippet_-_Retell_Eng_-_Blood_Ritual_tb81kf.mp3' },
+          { label: 'Full', language: 'EN', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781435662/Full_-_Retell_Eng_-_Blood_Ritual_wc9mrb.mp3' },
+          { label: 'Snippet', language: 'VI', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781435665/Snippet_-_Original_Vie_-_Blood_Ritual_bvpt6x.mp3' },
+          { label: 'Full', language: 'VI', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781435662/Full_-_Original_Vie_-_Blood_Ritual_zgexhb.mp3' }
+        ]
+      },
+      {
+        id: 'audio-consent',
+        label: 'Keyword 05',
+        title: 'Friend\'s Story',
+        desc: 'Four recordings about consent as an active process shaped by desire, limits, language, and ongoing mutual attention.',
+        context: 'Use this box to clarify the consent framework in the interviews, especially how participants describe agreement, refusal, renegotiation, and care.',
+        recordings: [
+          { label: 'Snippet', language: 'EN', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781435859/Snippet_-_Retell_Eng_-_Friend_s_Story_Negatively_Affected_vtuesf.mp3' },
+          { label: 'Full', language: 'EN', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781435855/Full_-_Retell_Eng_-_Friend_s_Story_Negatively_Affected_fyk0bv.mp3' },
+          { label: 'Snippet', language: 'VI', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781435857/Snippet_-_Original_Vie_-_Friend_s_Story_Negatively_Affected_zgifcl.mp3' },
+          { label: 'Full', language: 'VI', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781435863/Full_-_Original_Vie_-_Friend_s_Story_Negatively_Affected_pgchb2.mp3' }
+        ]
+      },
+      {
+        id: 'audio-boundaries',
+        label: 'Keyword 06',
+        title: 'Personal Story',
+        desc: 'Four recordings about naming limits, recognizing changing comfort levels, and protecting autonomy in intimate practice.',
+        context: 'Use this box to document what boundaries mean in this archive: physical limits, emotional limits, hard and soft limits, and how these are communicated.',
+        recordings: [
+          { label: 'Snippet', language: 'EN', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781435892/Snippet_-_Retell_Eng_-_Personal_Story_Positively_Affected_deicet.mp3' },
+          { label: 'Full', language: 'EN', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781435887/Full_-_Retell_Eng_-_Personal_Story_Positively_Affected_i3dg5p.mp3' },
+          { label: 'Snippet', language: 'VI', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781435890/Snippet_-_Original_Vie_-_Personal_Story_Positively_Affected_iyixyl.mp3' },
+          { label: 'Full', language: 'VI', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781435888/Full_-_Original_Vie_-_Personal_Story_Positively_Affected_zhem19.mp3' }
+        ]
+      },
+      {
+        id: 'audio-aftercare',
+        label: 'Keyword 07',
+        title: 'Aftercare',
+        desc: 'Four recordings about recovery, reassurance, physical comfort, emotional processing, and checking in after intensity.',
+        context: 'Use this box to note what kind of aftercare appears in each recording, whether practical, emotional, verbal, quiet, immediate, or delayed.',
+        recordings: [
+          { label: 'Snippet', language: 'EN', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781434408/Snippet_-_Retell_Eng_-_Aftercare_nwyh2s.mp3' },
+          { label: 'Full', language: 'EN', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781434407/Full_-_Retell_Eng_-_Aftercare_bzw75h.mp3' },
+          { label: 'Snippet', language: 'VI', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781434407/Snippet_-_Original_Vie_-_Aftercare_uppe9e.mp3' },
+          { label: 'Full', language: 'VI', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781434407/Full_-_Original_Vie_-_Aftercare_nkeyxo.mp3' }
+        ]
+      },
+      {
+        id: 'audio-communication',
+        label: 'Keyword 08',
+        title: 'Reward & Punishment',
+        desc: 'Four recordings about explicit conversation, nonverbal cues, check-ins, misunderstanding, and repair.',
+        context: 'Use this box to explain the communication practices shown in the interviews: direct speech, coded language, body cues, written negotiation, and follow-up conversations.',
+        recordings: [
+          { label: 'Snippet', language: 'EN', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781436002/Snippet_-_Retell_Eng_-_Reward_Punishment_uqgqij.mp3' },
+          { label: 'Full', language: 'EN', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781435997/Full_-_Retell_Eng_-_Reward_Punishment_ce5nsp.mp3' },
+          { label: 'Snippet', language: 'VI', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781435999/Snippet_-_Original_Vie_-_Punishment_Reward_fh0g11.mp3' },
+          { label: 'Full', language: 'VI', src: 'https://res.cloudinary.com/ddtvi7kmn/video/upload/q_auto/f_auto/v1781436009/Full_-_Original_Vie_-_Punishment_Reward_tudua5.mp3' }
+        ]
+      }
+    ];
+
+    function defaultTranscript() {
+      return `<em>[0:00]</em> Replace this text with the full transcript of the interview.
+
+<em>[0:30]</em> You can use timestamps like these to mark sections of the conversation.
+
+<em>[1:00]</em> Continue the transcript here. Italicised timestamps help viewers follow along with the audio as it plays.`;
+    }
+
+    function recordingMarkup(item, title) {
+      const note = item.note ? `<p class="audio-placeholder-note">${item.note}</p>` : '';
+      return `
+        <div class="recording-item">
+          <div class="recording-heading">
+            <span class="recording-label">${item.label}</span>
+            <span class="recording-language">${item.language}</span>
+          </div>
+          <div class="player" data-src="${item.src || ''}">
+            <audio preload="none"></audio>
+            <div class="player-controls">
+              <button class="play-btn" aria-label="Play ${title} ${item.label}">
+                <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21"/></svg>
+              </button>
+              <div class="progress-wrap">
+                <div class="progress-bar" role="slider" aria-label="Playback position" tabindex="0">
+                  <div class="progress-fill"></div>
+                </div>
+                <div class="progress-times">
+                  <span class="time-current">0:00</span>
+                  <span class="time-total">--:--</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          ${note}
+        </div>`;
+    }
+
+    function buildAudioInterviews() {
+      const list = document.querySelector('#audio .audio-list');
+      if (!list) return;
+      list.innerHTML = audioInterviews.map(item => `
+        <article class="audio-card reveal" id="${item.id}">
+          <div class="audio-main">
+            <div class="audio-info">
+              <div class="audio-meta">
+                <span class="audio-label">${item.label}</span>
+                <h3 class="audio-title">${item.title}</h3>
+                <p class="audio-desc">${item.desc}</p>
+              </div>
+            </div>
+            <div class="audio-player-wrap">
+              ${item.recordings.map(recording => recordingMarkup(recording, item.title)).join('')}
+            </div>
+          </div>
+          <div class="audio-context">
+            <span class="context-label">Context</span>
+            <p>${item.context}</p>
+          </div>
+          <div class="transcript-action">
+            <button class="transcript-toggle" aria-expanded="false">
+              <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+              Transcripts
+            </button>
+          </div>
+          <div class="transcript-panel" aria-hidden="true">
+            <div class="transcript-inner">${item.transcript || defaultTranscript()}</div>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    buildAudioInterviews();
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.08 });
+
+    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+    /* ── Audio players ── */
+    function formatTime(s) {
+      if (!isFinite(s)) return '—:——';
+      const m = Math.floor(s / 60);
+      const sec = String(Math.floor(s % 60)).padStart(2, '0');
+      return `${m}:${sec}`;
+    }
+
+    let currentPlayer = null;
+
+    document.querySelectorAll('.player').forEach(playerEl => {
+      const audio = playerEl.querySelector('audio');
+      const btn = playerEl.querySelector('.play-btn');
+      const fill = playerEl.querySelector('.progress-fill');
+      const bar = playerEl.querySelector('.progress-bar');
+      const timeCurrent = playerEl.querySelector('.time-current');
+      const timeTotal = playerEl.querySelector('.time-total');
+      const src = playerEl.dataset.src;
+
+      if (src) {
+        audio.src = src;
+      } else {
+        btn.disabled = true;
+        bar.style.pointerEvents = 'none';
+      }
+
+      audio.addEventListener('loadedmetadata', () => {
+        timeTotal.textContent = formatTime(audio.duration);
+      });
+
+      audio.addEventListener('timeupdate', () => {
+        if (!audio.duration) return;
+        const pct = (audio.currentTime / audio.duration) * 100;
+        fill.style.width = pct + '%';
+        timeCurrent.textContent = formatTime(audio.currentTime);
+      });
+
+      audio.addEventListener('ended', () => {
+        btn.classList.remove('playing');
+        fill.style.width = '0%';
+        timeCurrent.textContent = '0:00';
+        currentPlayer = null;
+      });
+
+      btn.addEventListener('click', () => {
+        if (!src) return;
+        if (currentPlayer && currentPlayer !== audio) {
+          currentPlayer.pause();
+          const prevBtn = currentPlayer.closest('.player').querySelector('.play-btn');
+          prevBtn.classList.remove('playing');
+        }
+        if (audio.paused) {
+          audio.play().catch(() => {});
+          btn.classList.add('playing');
+          currentPlayer = audio;
+        } else {
+          audio.pause();
+          btn.classList.remove('playing');
+          currentPlayer = null;
+        }
+      });
+
+      /* click on progress bar */
+      bar.addEventListener('click', e => {
+        if (!audio.duration) return;
+        const rect = bar.getBoundingClientRect();
+        const pct = (e.clientX - rect.left) / rect.width;
+        audio.currentTime = pct * audio.duration;
+      });
+    });
+
+    /* ── Transcript toggles ── */
+    document.querySelectorAll('.transcript-toggle').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const panel = btn.closest('.audio-card').querySelector('.transcript-panel');
+        const open = panel.classList.toggle('open');
+        btn.classList.toggle('open', open);
+        btn.setAttribute('aria-expanded', open);
+        panel.setAttribute('aria-hidden', !open);
+      });
+    });
+  </script>
+</body>
+</html>
